@@ -7,11 +7,90 @@ import sqlite3
 productos = []
 precio_total = 0.0
 
-class Product:
+class Product(tk.Frame):
     db_nombre = 'mi_empresa.db'
 
     def __init__(self, window):
-        self.wind = window
+        self.log = window
+        self.log.title('Login')
+
+        login = LabelFrame(self.log, text = 'Login')
+        login.grid(row = 1, column = 0, columnspan = 2, pady = 20)
+
+        Label(login, text = 'Usuario: ').grid(row = 0, column = 0)
+        self.usuario = Entry(login)
+        self.usuario.focus()
+        self.usuario.grid(row = 0, column = 1)
+
+        Label(login, text = 'Contraseña: ').grid(row = 1, column = 0)
+        self.contrasena = Entry(login)
+        self.contrasena.grid(row = 1, column = 1)
+
+        self.error_login = Label(login, text = '', fg = 'red')
+        self.error_login.grid(row = 2, column = 0, columnspan = 2, sticky = W + E)
+
+        ttk.Button(text = 'Iniciar Sesion', command = self.login).grid(row = 2, column = 0, sticky = W + E)
+        ttk.Button(text = 'Registrate', command = self.sign_up).grid(row = 2, column = 1, sticky = W + E)
+
+    def login(self):
+        if len(self.usuario.get()) != 0 and len(self.contrasena.get()) != 0:
+            query = 'SELECT * FROM usuario WHERE username = ?'
+            usuario = self.busqueda(query, (self.usuario.get(), ))
+
+            if usuario is None:
+                self.error_login['text'] = 'Usuario no exite'
+
+            else:
+                if usuario[1] == self.contrasena.get():
+                    self.error_login['text'] = ''
+                    self.inicio()
+                else:
+                    self.error_login['text'] = 'Contraseña incorrecta'
+
+        else:
+            self.error_login['text'] = 'Usuario y/o contraseña está vacio'
+
+    def sign_up(self):
+        self.registro = Toplevel()
+        self.registro.title('Registro')
+
+        sign = LabelFrame(self.registro, text = 'Registro')
+        sign.grid(row = 1, column = 0, columnspan = 2, pady = 20)
+
+        Label(sign, text = 'Usuario: ').grid(row = 0, column = 0)
+        self.usuario_sign_up = Entry(sign)
+        self.usuario_sign_up.focus()
+        self.usuario_sign_up.grid(row = 0, column = 1)
+
+        Label(sign, text = 'Contraseña: ').grid(row = 1, column = 0)
+        self.contrasena_sign_up = Entry(sign)
+        self.contrasena_sign_up.grid(row = 1, column = 1)
+
+        self.error_sign = Label(sign, text = '', fg = 'red')
+        self.error_sign.grid(row = 2, column = 0, columnspan = 2, sticky = W + E)
+
+        ttk.Button(self.registro, text = 'Registrar', command = self.sign_up_funcion).grid(row = 2, column = 0, sticky = W + E)
+
+    def sign_up_funcion(self):
+        if len(self.usuario_sign_up.get()) != 0 and len(self.contrasena_sign_up.get()) != 0:
+            query = 'SELECT * FROM usuario WHERE username = ?'
+            usuario = self.busqueda(query, (self.usuario_sign_up.get(), ))
+
+            if usuario is None:
+                query = 'INSERT INTO usuario VALUES (?, ?)'
+                self.run_query(query, (self.usuario_sign_up.get(), self.contrasena_sign_up.get()))
+
+                self.registro.destroy()
+
+            else:
+                self.error_sign['text'] = 'Usuario ya existe'
+
+        else:
+            self.error_sign['text'] = 'Usuario y/o contraseña está vacio'
+
+
+    def inicio(self):
+        self.wind = Toplevel()
         self.wind.title('Factura Online')
 
         #Frame Cliente
@@ -63,7 +142,7 @@ class Product:
         ttk.Button(frame, text = 'Agregar producto', command = self.agregar_producto).grid(row = 4, column = 1, sticky = W + E)
 
         #Cabeceras
-        self.tree = ttk.Treeview(height = 10, columns = (1, 2))
+        self.tree = ttk.Treeview(self.wind, height = 10, columns = (1, 2))
         self.tree.grid(row = 5, column = 0, columnspan = 2)
         self.tree.heading('#0', text = 'Cantidad', anchor = 'center')
         self.tree.heading('#1', text = 'Nombre', anchor = 'center')
@@ -71,7 +150,7 @@ class Product:
         self.tree.bind("<Double-1>", self.eliminar)
 
         #Generar
-        ttk.Button(text = 'Generar Factura', command = self.generarFactura).grid(row = 6, column = 0)
+        ttk.Button(self.wind, text = 'Generar Factura', command = self.generarFactura).grid(row = 6, column = 0)
 
         #Total
         total = LabelFrame(self.wind, text = 'Total')
@@ -183,7 +262,7 @@ class Product:
         producto = self.busqueda(query, (self.producto_id.get(), ))
 
         if producto is None:
-            query = 'INSERT OR IGNORE INTO product VALUES (?, ?, ?)'
+            query = 'INSERT INTO product VALUES (?, ?, ?)'
             self.run_query(query, (self.producto_id.get(), self.producto_nombre.get(), self.producto_precio.get()))
 
             self.producto_id.delete(0, END)
@@ -221,7 +300,7 @@ class Product:
             direccion_cliente = self.direccion.get()
 
             self.factura_wind = Toplevel()
-            self.factura_wind.title = "Factura"
+            self.factura_wind.title('Factura')
 
             #Razon Social
             Label(self.factura_wind, text = 'Razon Social: ').grid(row = 1, column = 1)
@@ -266,4 +345,5 @@ class Product:
 if __name__ == '__main__':
     window = Tk()
     app = Product(window)
+    #app = Login(window)
     window.mainloop()
