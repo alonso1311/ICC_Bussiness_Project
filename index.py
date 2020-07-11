@@ -41,7 +41,7 @@ class Product(tk.Frame):
                 self.error_login['text'] = 'Usuario no exite'
 
             else:
-                if usuario[1] == self.contrasena.get():
+                if usuario[3] == self.contrasena.get():
                     self.error_login['text'] = ''
                     self.inicio()
                 else:
@@ -62,23 +62,31 @@ class Product(tk.Frame):
         self.usuario_sign_up.focus()
         self.usuario_sign_up.grid(row = 0, column = 1)
 
-        Label(sign, text = 'Contraseña: ').grid(row = 1, column = 0)
+        Label(sign, text = 'Nombre: ').grid(row = 1, column = 0)
+        self.nombre_sign_up = Entry(sign)
+        self.nombre_sign_up.grid(row = 1, column = 1)
+
+        Label(sign, text = 'Apellido: ').grid(row = 2, column = 0)
+        self.apellido_sign_up = Entry(sign)
+        self.apellido_sign_up.grid(row = 2, column = 1)
+
+        Label(sign, text = 'Contraseña: ').grid(row = 3, column = 0)
         self.contrasena_sign_up = Entry(sign)
-        self.contrasena_sign_up.grid(row = 1, column = 1)
+        self.contrasena_sign_up.grid(row = 3, column = 1)
 
         self.error_sign = Label(sign, text = '', fg = 'red')
-        self.error_sign.grid(row = 2, column = 0, columnspan = 2, sticky = W + E)
+        self.error_sign.grid(row = 4, column = 0, columnspan = 2, sticky = W + E)
 
-        ttk.Button(self.registro, text = 'Registrar', command = self.sign_up_funcion).grid(row = 2, column = 0, sticky = W + E)
+        ttk.Button(self.registro, text = 'Registrar', command = self.sign_up_funcion).grid(row = 2, column = 0, columnspan = 2, sticky = W + E)
 
     def sign_up_funcion(self):
-        if len(self.usuario_sign_up.get()) != 0 and len(self.contrasena_sign_up.get()) != 0:
+        if len(self.usuario_sign_up.get()) != 0 and len(self.nombre_sign_up.get()) != 0 and len(self.apellido_sign_up.get()) != 0 and len(self.contrasena_sign_up.get()) != 0:
             query = 'SELECT * FROM usuario WHERE username = ?'
             usuario = self.busqueda(query, (self.usuario_sign_up.get(), ))
 
             if usuario is None:
-                query = 'INSERT INTO usuario VALUES (?, ?)'
-                self.run_query(query, (self.usuario_sign_up.get(), self.contrasena_sign_up.get()))
+                query = 'INSERT INTO usuario VALUES (?, ?, ?, ?)'
+                self.run_query(query, (self.usuario_sign_up.get(), self.nombre_sign_up.get(), self.apellido_sign_up.get(), self.contrasena_sign_up.get()))
 
                 self.registro.destroy()
 
@@ -86,7 +94,7 @@ class Product(tk.Frame):
                 self.error_sign['text'] = 'Usuario ya existe'
 
         else:
-            self.error_sign['text'] = 'Usuario y/o contraseña está vacio'
+            self.error_sign['text'] = 'Datos incompletos'
 
 
     def inicio(self):
