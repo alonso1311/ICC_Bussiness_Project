@@ -204,7 +204,7 @@ class Product(tk.Frame):
             query = 'SELECT * FROM empresas WHERE ruc = ?'
             empresa = self.busqueda(query, (self.ruc.get(), ))
             if empresa is None:
-                query = 'INSERT OR IGNORE INTO empresas VALUES (?, ?, ?)'
+                query = 'INSERT INTO empresas VALUES (?, ?, ?)'
                 self.run_query(query, (self.ruc.get(), self.cliente.get(), self.direccion.get()))
                 self.error_cliente['fg'] = 'green'
                 self.error_cliente['text'] = 'Empresa insertada exitosamente'
@@ -213,7 +213,7 @@ class Product(tk.Frame):
                 self.error_cliente['text'] = 'RUC ya existe' 
         else:
             self.error_cliente['fg'] = 'red'
-            self.error_cliente['text'] = 'Nombre y/o RUC esta vacio'
+            self.error_cliente['text'] = 'Falta datos'
 
     def mostrar(self):
         for item in self.tree.get_children():
@@ -266,22 +266,26 @@ class Product(tk.Frame):
         ttk.Button(self.producto_db, text = 'Agregar', command = self.agregar_producto_db).grid(row = 5, column = 2, columnspan = 2, sticky = W + E)
 
     def agregar_producto_db(self):
-        query = 'SELECT * FROM product WHERE id = ?'
-        producto = self.busqueda(query, (self.producto_id.get(), ))
+        if len(self.producto_id.get()) != 0 and len(self.producto_nombre.get()) != 0 and len(self.producto_precio.get()) != 0:
+            query = 'SELECT * FROM product WHERE id = ?'
+            producto = self.busqueda(query, (self.producto_id.get(), ))
 
-        if producto is None:
-            query = 'INSERT INTO product VALUES (?, ?, ?)'
-            self.run_query(query, (self.producto_id.get(), self.producto_nombre.get(), self.producto_precio.get()))
+            if producto is None:
+                query = 'INSERT INTO product VALUES (?, ?, ?)'
+                self.run_query(query, (self.producto_id.get(), self.producto_nombre.get(), self.producto_precio.get()))
 
-            self.producto_id.delete(0, END)
-            self.producto_nombre.delete(0, END)
-            self.producto_precio.delete(0, END)
+                self.producto_id.delete(0, END)
+                self.producto_nombre.delete(0, END)
+                self.producto_precio.delete(0, END)
 
-            self.producto_error['fg'] = 'green'
-            self.producto_error['text'] = 'Producto insertado correctamente'
+                self.producto_error['fg'] = 'green'
+                self.producto_error['text'] = 'Producto insertado correctamente'
+            else:
+                self.producto_error['fg'] = 'red'
+                self.producto_error['text'] = 'ID ya existe'
         else:
             self.producto_error['fg'] = 'red'
-            self.producto_error['text'] = 'ID ya existe'
+            self.producto_error['text'] = 'Falta datos'
 
     def eliminar(self, event):
         global precio_total
@@ -348,10 +352,9 @@ class Product(tk.Frame):
 
         else:
             self.error_cliente['fg'] = 'red'
-            self.error_cliente['text'] = 'Nombre y/o RUC esta vacio'
+            self.error_cliente['text'] = 'Falta datos'
 
 if __name__ == '__main__':
     window = Tk()
     app = Product(window)
-    #app = Login(window)
     window.mainloop()
